@@ -1,29 +1,21 @@
-﻿using System;
+﻿using MessagePack;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace SocialMediaBrain.Models;
+namespace SocialMediaBrain.DatabaseFirstApproach;
 
 public partial class User
 {
     public int UserId { get; set; }
-
     public string FirstName { get; set; } = null!;
-
     public string LastName { get; set; } = null!;
-
     public string Email { get; set; } = null!;
-
     public string Password { get; set; } = null!;
-
     public string PhoneNumber { get; set; } = null!;
-
     public DateTime CreatedDate { get; set; }
-
     public DateTime UpdatedDate { get; set; }
-
     public int Gender { get; set; }
-
     [NotMapped]
     public virtual ICollection<Relationship> RelationshipFriends { get; } = new List<Relationship>();
     [NotMapped]

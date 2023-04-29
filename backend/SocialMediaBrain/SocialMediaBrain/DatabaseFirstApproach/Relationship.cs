@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace SocialMediaBrain.Models;
+namespace SocialMediaBrain.DatabaseFirstApproach;
 
 public partial class Relationship
 {
-    public int RelationshipNo { get; set; }
+    public int RelationshipId { get; }
 
     public int? UserId { get; set; }
 

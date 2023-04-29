@@ -2,15 +2,15 @@
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 
-namespace SocialMediaBrain.Models;
+namespace SocialMediaBrain.DatabaseFirstApproach;
 
-public partial class MyDbContext : DbContext
+public partial class TestContext : DbContext
 {
-    public MyDbContext()
+    public TestContext()
     {
     }
 
-    public MyDbContext(DbContextOptions<MyDbContext> options)
+    public TestContext(DbContextOptions<TestContext> options)
         : base(options)
     {
     }
@@ -26,7 +26,7 @@ public partial class MyDbContext : DbContext
     {
         modelBuilder.Entity<Relationship>(entity =>
         {
-            entity.HasKey(e => e.RelationshipNo).HasName("PK__Relation__31FC6B811E7FE644");
+            entity.HasKey(e => e.RelationshipId).HasName("PK__Relation__31FEB8813D786BE1");
 
             entity.Property(e => e.FriendId).HasColumnName("FriendID");
             entity.Property(e => e.RelationIsActive)
@@ -36,11 +36,11 @@ public partial class MyDbContext : DbContext
 
             entity.HasOne(d => d.Friend).WithMany(p => p.RelationshipFriends)
                 .HasForeignKey(d => d.FriendId)
-                .HasConstraintName("FK__Relations__Frien__5DCAEF64");
+                .HasConstraintName("FK__Relations__Frien__03F0984C");
 
             entity.HasOne(d => d.User).WithMany(p => p.RelationshipUsers)
                 .HasForeignKey(d => d.UserId)
-                .HasConstraintName("FK__Relations__UserI__5CD6CB2B");
+                .HasConstraintName("FK__Relations__UserI__02FC7413");
         });
 
         modelBuilder.Entity<User>(entity =>

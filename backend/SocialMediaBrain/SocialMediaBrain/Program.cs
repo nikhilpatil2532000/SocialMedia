@@ -1,15 +1,16 @@
 using Microsoft.EntityFrameworkCore;
-using SocialMediaBrain.Data;
-using SocialMediaBrain.Models;
 using Newtonsoft.Json.Converters;
-using Microsoft.AspNetCore.Mvc;
-using SocialMediaBrain.Controllers;
+using SocialMediaBrain.DatabaseFirstApproach;
 using SocialMediaBrain.Interfaces;
 using SocialMediaBrain.Managers;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddDbContext<SocialMediaBrainContext>(options =>
+/*builder.Services.AddDbContext<SocialMediaBrainContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("SocialMediaBrainContext") 
+    ?? throw new InvalidOperationException("Connection string 'SocialMediaBrainContext' not found.")));*/
+
+builder.Services.AddDbContext<TestContext>(option =>
+    option.UseSqlServer(builder.Configuration.GetConnectionString("SocialMediaBrainContext")
     ?? throw new InvalidOperationException("Connection string 'SocialMediaBrainContext' not found.")));
 
 // Add services to the container.

@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.JsonPatch;
 using SocialMediaBrain.InternalModel;
-using SocialMediaBrain.Models;
 
 namespace SocialMediaBrain.Interfaces
 {

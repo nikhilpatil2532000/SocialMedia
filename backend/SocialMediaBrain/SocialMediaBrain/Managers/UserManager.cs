@@ -1,19 +1,18 @@
-﻿using SocialMediaBrain.Data;
-using SocialMediaBrain.Interfaces;
-using SocialMediaBrain.Models;
+﻿using AutoMapper;
 using Microsoft.AspNetCore.JsonPatch;
-using AutoMapper;
-using SocialMediaBrain.InternalModel;
 using Microsoft.EntityFrameworkCore;
+using SocialMediaBrain.DatabaseFirstApproach;
+using SocialMediaBrain.Interfaces;
+using SocialMediaBrain.InternalModel;
 
 namespace SocialMediaBrain.Managers
 {
     public class UserManager : IUserManager
     {
-        private SocialMediaBrainContext _dbContext;
+        private TestContext _dbContext;
         private IMapper _mapper;
         public UserManager(
-            SocialMediaBrainContext dbContext,
+            TestContext dbContext,
             IMapper mapper
         )
         {
@@ -23,11 +22,14 @@ namespace SocialMediaBrain.Managers
 
         public async Task<UserModel> AddUser(UserModel user)
         {
-            UserModel userModel = _mapper.Map<UserModel>(await _dbContext.Users.AddAsync(_mapper.Map<User>(user)));
+            User newUser = _mapper.Map<User>(user);
+            newUser.CreatedDate = DateTime.Now;
+            newUser.UpdatedDate = DateTime.Now;
+            await _dbContext.Users.AddAsync(newUser);
             _dbContext.SaveChanges();
-            return userModel;
+            return _mapper.Map<UserModel>(newUser);
         }
-
+            
         public async Task<List<UserModel>> GetAllUsers()
         {
             List<UserModel> listOfUsers= await _dbContext.Users.Select(user => _mapper.Map<UserModel>(user)).ToListAsync();
@@ -42,9 +44,10 @@ namespace SocialMediaBrain.Managers
 
         public async Task<bool> UpdateUserProperty(int id, JsonPatchDocument jsonPatchDocument)
         {
-            User? user = await _dbContext.Users.Where(i => i.UserId == id).FirstOrDefaultAsync();   
+            User? user = await _dbContext.Users.Where(i => i.UserId == id).FirstOrDefaultAsync();
             if (user != null)
             {
+                user.UpdatedDate = DateTime.Now;
                 jsonPatchDocument.ApplyTo(user);
                 _dbContext.SaveChanges();
                 return true;
@@ -54,27 +57,15 @@ namespace SocialMediaBrain.Managers
 
         public async Task<bool> UpdateUser(int id, UserModel value)
         {
-            /*User? user = await _dbContext.Users.Where(user => user.UserId == id).FirstOrDefaultAsync();
-            if (user != null)
-            {
-                user.FirstName = value.FirstName;
-                user.LastName = value.LastName;
-                user.Email = value.Email;
-                user.Password = value.Password;
-                user.PhoneNumber = value.PhoneNumber;
-                user.Gender = value.Gender;
-            }
-            await _dbContext.SaveChangesAsync();
-            return _mapper.Map<UserModel?>(user);*/
             User user = _mapper.Map<User>(value);
-            user.UserId = id;
             int numberOfUpdatedRows = await _dbContext.Users.ExecuteUpdateAsync(s => 
                 s.SetProperty(i => i.FirstName,user.FirstName)
                  .SetProperty(i => i.LastName, user.LastName)
                  .SetProperty(i => i.Email, user.Email)
                  .SetProperty(i => i.Password, user.Password)
                  .SetProperty(i => i.PhoneNumber, user.PhoneNumber)
-                 .SetProperty(i => i.Gender, user.Gender));
+                 .SetProperty(i => i.Gender, user.Gender)
+                 .SetProperty(i => i.UpdatedDate, DateTime.Now));
             await _dbContext.SaveChangesAsync();
             return (numberOfUpdatedRows > 0) ? true : false;
         }
