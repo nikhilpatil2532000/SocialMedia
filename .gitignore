@@ -1,0 +1,9 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/backend/SocialMediaBrain/.vs
+*.dll
+/backend/SocialMediaBrain/SocialMediaBrain/obj
+/backend/SocialMediaBrain/SocialMediaBrainTests/obj
+/backend/SocialMediaBrain/SocialMediaBrain/bin/Debug/net6.0
