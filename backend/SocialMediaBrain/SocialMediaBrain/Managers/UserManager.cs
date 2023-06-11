@@ -4,76 +4,57 @@ using Microsoft.EntityFrameworkCore;
 using SocialMediaBrain.DatabaseFirstApproach;
 using SocialMediaBrain.Interfaces;
 using SocialMediaBrain.InternalModel;
+using SocialMediaBrain.ResponseBodyModel;
+using System.Data.Entity;
 
 namespace SocialMediaBrain.Managers
 {
     public class UserManager : IUserManager
     {
-        private TestContext _dbContext;
         private IMapper _mapper;
+        private IUserDaoManager _userDaoManager;
         public UserManager(
-            TestContext dbContext,
-            IMapper mapper
+            IMapper mapper,
+            IUserDaoManager userDaoManager
         )
         {
-            _dbContext = dbContext;
             _mapper = mapper;
+            _userDaoManager = userDaoManager;
         }
 
-        public async Task<UserModel> AddUser(UserModel user)
+        public async Task<AddResponseBody<UserModel>> AddUserAsync(UserModel user)
         {
-            User newUser = _mapper.Map<User>(user);
-            newUser.CreatedDate = DateTime.Now;
-            newUser.UpdatedDate = DateTime.Now;
-            await _dbContext.Users.AddAsync(newUser);
-            _dbContext.SaveChanges();
-            return _mapper.Map<UserModel>(newUser);
+            return await _userDaoManager.AddUserAsync(user);
         }
             
-        public async Task<List<UserModel>> GetAllUsers()
+        public async Task<GetResponseBody<UserModel>> GetAllUsersAsync(int take)
         {
-            List<UserModel> listOfUsers= await _dbContext.Users.Select(user => _mapper.Map<UserModel>(user)).ToListAsync();
-            return listOfUsers;
+            return await _userDaoManager.GetAllUsersAsync(take);
         }
 
-        public async Task<UserModel?> GetUserById(int id)
+        public async Task<GetResponseBody<UserModel>> GetUserByIdAsync(int id)
         {
-            UserModel? userMode = _mapper.Map<UserModel>(await _dbContext.Users.Where(user => user.UserId == id).FirstOrDefaultAsync());
-            return userMode;
+            return await _userDaoManager.GetUserByIdAsync(id);
         }
 
-        public async Task<bool> UpdateUserProperty(int id, JsonPatchDocument jsonPatchDocument)
+        public async Task<GetResponseBody<UserModel>> UserFilter(FilterModel userFilterModel)
         {
-            User? user = await _dbContext.Users.Where(i => i.UserId == id).FirstOrDefaultAsync();
-            if (user != null)
-            {
-                user.UpdatedDate = DateTime.Now;
-                jsonPatchDocument.ApplyTo(user);
-                _dbContext.SaveChanges();
-                return true;
-            }
-            return false;
+            return await _userDaoManager.UserFilter(userFilterModel);
         }
 
-        public async Task<bool> UpdateUser(int id, UserModel value)
+        public async Task<UpdateResponseBody<UserModel>> UpdateUserPropertyAsync(int id, JsonPatchDocument jsonPatchDocument)
         {
-            User user = _mapper.Map<User>(value);
-            int numberOfUpdatedRows = await _dbContext.Users.ExecuteUpdateAsync(s => 
-                s.SetProperty(i => i.FirstName,user.FirstName)
-                 .SetProperty(i => i.LastName, user.LastName)
-                 .SetProperty(i => i.Email, user.Email)
-                 .SetProperty(i => i.Password, user.Password)
-                 .SetProperty(i => i.PhoneNumber, user.PhoneNumber)
-                 .SetProperty(i => i.Gender, user.Gender)
-                 .SetProperty(i => i.UpdatedDate, DateTime.Now));
-            await _dbContext.SaveChangesAsync();
-            return (numberOfUpdatedRows > 0) ? true : false;
+            return await _userDaoManager.UpdateSingleUserPropertyAsync(id, jsonPatchDocument);
         }
 
-        public async Task<bool> DeleteUserById(int id)
+        public async Task<UpdateResponseBody<UserModel>> UpdateUserAsync(int id, UserModel user)
         {
-            int numberOfRowsDeleted = await _dbContext.Users.Where(user => user.UserId == id).ExecuteDeleteAsync();
-            return (numberOfRowsDeleted > 0) ? true : false; 
+            return await _userDaoManager.UpdateMultipleUserPropertyAsync(id, user);
+        }
+
+        public async Task<DeleteResponseBody<UserModel>> DeleteUserByIdAsync(int id)
+        {
+            return await _userDaoManager.DeleteUserByIdAsync(id); 
         }
     }
 }

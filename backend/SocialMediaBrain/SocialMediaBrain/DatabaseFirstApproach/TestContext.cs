@@ -26,28 +26,33 @@ public partial class TestContext : DbContext
     {
         modelBuilder.Entity<Relationship>(entity =>
         {
-            entity.HasKey(e => e.RelationshipId).HasName("PK__Relation__31FEB8813D786BE1");
+            entity.HasKey(e => e.RelationshipNo).HasName("PK__Relation__31FC6B813E9847FC");
 
+            entity.Property(e => e.CreatedDate).HasColumnType("datetime");
             entity.Property(e => e.FriendId).HasColumnName("FriendID");
             entity.Property(e => e.RelationIsActive)
                 .IsRequired()
                 .HasDefaultValueSql("((1))");
+            entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
             entity.Property(e => e.UserId).HasColumnName("UserID");
 
             entity.HasOne(d => d.Friend).WithMany(p => p.RelationshipFriends)
                 .HasForeignKey(d => d.FriendId)
-                .HasConstraintName("FK__Relations__Frien__03F0984C");
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__Relations__Frien__2BFE89A6");
 
             entity.HasOne(d => d.User).WithMany(p => p.RelationshipUsers)
                 .HasForeignKey(d => d.UserId)
-                .HasConstraintName("FK__Relations__UserI__02FC7413");
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__Relations__UserI__2B0A656D");
         });
 
         modelBuilder.Entity<User>(entity =>
         {
-            entity.Property(e => e.Email).HasDefaultValueSql("(N'')");
-            entity.Property(e => e.Password).HasDefaultValueSql("(N'')");
-            entity.Property(e => e.PhoneNumber).HasDefaultValueSql("(N'')");
+            entity.HasKey(e => e.UserId).HasName("PK__Users__1788CC4C4FA09FA0");
+
+            entity.Property(e => e.CreatedDate).HasColumnType("datetime");
+            entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
         });
 
         OnModelCreatingPartial(modelBuilder);

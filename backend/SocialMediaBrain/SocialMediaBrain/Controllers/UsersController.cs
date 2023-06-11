@@ -7,7 +7,7 @@ using SocialMediaBrain.InternalModel;
 
 namespace SocialMediaBrain.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/user")]
     [ApiController]
     public class UsersController : ControllerBase
     {
@@ -20,53 +20,53 @@ namespace SocialMediaBrain.Controllers
             _userManager = userManager;
         }
 
-        // GET: api/<UsersController>
-        [HttpGet("users")]
-        public async Task<IActionResult> Get()
+        // GET: api/user
+        [HttpGet]
+        public async Task<IActionResult> GetAll([FromQuery] int top = 100)
         {
-            return Ok(await _userManager.GetAllUsers());
+            return Ok(await _userManager.GetAllUsersAsync(top));
         }
 
-        // GET api/<UsersController>/5
-        [HttpGet("user/{id}")]
+        // GET api/user/5
+        [HttpGet("{id}")]
         public async Task<IActionResult> Get(int id)
         {
-            UserModel? user = await _userManager.GetUserById(id);
-            if (user != null)
-                return Ok(user);
-            return NotFound($"user {id} is not found");
+            return Ok(await _userManager.GetUserByIdAsync(id));
         }
 
-        // POST api/<UsersController>
-        [HttpPost("user")]
+        // GET api/filter
+        [HttpGet("filter")]
+        public async Task<IActionResult> filter([FromQuery] FilterModel userFilterModel)
+        {
+            return Ok(await _userManager.UserFilter(userFilterModel));
+        }
+
+        // POST api/user
+        [HttpPost]
         public async Task<IActionResult> Post([FromBody] UserModel user)
         {
-            UserModel userModel = await _userManager.AddUser(user);
-            return Ok(userModel);
+            return Ok(await _userManager.AddUserAsync(user));
         }
 
-        // PUT api/<UsersController>/user/5
-        [HttpPut("user/{id}")]
+        // PUT api/user/user/5
+        [HttpPut("{id}")]
         public async Task<IActionResult> UpdateUser([FromRoute] int id, [FromBody] UserModel value)
         {
-            var temp = await _userManager.UpdateUser(id, value);
-            return Ok(temp);
+            return Ok(await _userManager.UpdateUserAsync(id, value));
         }
 
-        // PATCH api/<UsersController>/5
+        // PATCH api/user/5
         [HttpPatch("{id}")]
         public async Task<IActionResult> Patch(int id, JsonPatchDocument jsonPatchDocument)
         {
-            var temp = await _userManager.UpdateUserProperty(id, jsonPatchDocument);
-            return Ok(temp);
+            return Ok(await _userManager.UpdateUserPropertyAsync(id, jsonPatchDocument));
         }
 
-        // DELETE api/<UsersController>/5
-        [HttpDelete("user/{id}")]
+        // DELETE api/user/5
+        [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var temp = await _userManager.DeleteUserById(id);
-            return Ok(temp);
+            return Ok(await _userManager.DeleteUserByIdAsync(id));
         }
     }
 }

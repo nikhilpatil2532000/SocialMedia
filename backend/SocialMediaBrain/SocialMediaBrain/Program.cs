@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Converters;
+using SocialMediaBrain.DaoManagers;
 using SocialMediaBrain.DatabaseFirstApproach;
+using SocialMediaBrain.GenericDao;
 using SocialMediaBrain.Interfaces;
 using SocialMediaBrain.Managers;
 
@@ -23,9 +25,13 @@ builder.Services.AddControllers().AddNewtonsoftJson(JsonOptions =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddAutoMapper(typeof(Program));
-builder.Services.AddTransient<IUserManager,UserManager>();
+builder.Services.AddScoped<IUserManager,UserManager>();
+builder.Services.AddScoped<IRelationshipManager, RelationshipManager>();
+builder.Services.AddScoped(typeof(IGenericDao<>),typeof(GenericDao<>));
+builder.Services.AddTransient<IUserDaoManager, UserDaoManager>();
 
 var app = builder.Build();
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

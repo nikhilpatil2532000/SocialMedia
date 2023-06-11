@@ -9,11 +9,16 @@ namespace SocialMediaBrain.AutoMapper
         public ApplicationMapper()
         {
             CreateMap<User, UserModel>();
+            /*
+             * removed date time to ignore while converting objectModel into object 
+             */
+            CreateMap<UserModel, User>()
+                .ForMember(user => user.UserId, option => option.Ignore());
 
-            CreateMap<UserModel, User> ()
-                .ForMember(user => user.UserId, option => option.Ignore())
-                .ForMember(user => user.UpdatedDate, option => option.Ignore())
-                .ForMember(user => user.CreatedDate, option => option.Ignore()).ReverseMap();
+            CreateMap<Relationship, RelationshipModel>();
+
+            CreateMap<RelationshipModel, Relationship>()
+                .ForMember(relation => relation.RelationshipNo, option => option.Ignore());
         }
     }
 }
