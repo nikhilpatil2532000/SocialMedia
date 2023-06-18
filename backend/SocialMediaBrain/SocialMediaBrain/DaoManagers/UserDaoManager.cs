@@ -33,11 +33,11 @@ namespace SocialMediaBrain.DaoManagers
                 user.CreatedDate = DateTime.Now;
                 user.UpdatedDate = DateTime.Now;
                 var inputObj = _mapper.Map<User>(user);
-                EntityEntry<User> entryEntity = await this.AddAsync(inputObj);
-                if (entryEntity.State == EntityState.Added) {
+                OperationStatus<User> operationStatus = await this.AddAsync(inputObj);
+                if (operationStatus.State == EntityState.Added) {
+                    addResponseBody.Entity = _mapper.Map<UserModel>(operationStatus.Entity);
+                    addResponseBody.ID = addResponseBody.Entity.UserId;
                     addResponseBody.Success = true;
-                    addResponseBody.Entity = _mapper.Map<UserModel>(entryEntity.Entity);
-                    addResponseBody.ID = entryEntity.Entity.UserId;
                 }
             }
             catch (Exception ex)
@@ -53,8 +53,8 @@ namespace SocialMediaBrain.DaoManagers
             try
             {
                 List<User> userList = await this.GetAllAsync(take);
-                getResponseBody.Success = true;
                 getResponseBody.EntityList = _mapper.Map<List<UserModel>>(userList);
+                getResponseBody.Success = true;
             }
             catch (Exception ex)
             {
@@ -69,8 +69,11 @@ namespace SocialMediaBrain.DaoManagers
             try
             {
                 User? user = await this.GetByIdAsync(id);
-                getResponseBody.Success = true;
-                getResponseBody.Entity = _mapper.Map<UserModel>(user);
+                if(user != null)
+                {
+                    getResponseBody.Entity = _mapper.Map<UserModel>(user);
+                    getResponseBody.Success = true;
+                }
             }
             catch (Exception ex)
             {
@@ -85,8 +88,8 @@ namespace SocialMediaBrain.DaoManagers
             try
             {
                 List<User> userList = await this.FilterAsync(userFilterModel.PropertyName, userFilterModel.value);
-                getResponseBody.Success = true;
                 getResponseBody.EntityList = _mapper.Map<List<UserModel>>(userList);
+                getResponseBody.Success = true;
             }
             catch (Exception ex)
             {
@@ -105,10 +108,10 @@ namespace SocialMediaBrain.DaoManagers
                 {
                     user.UpdatedDate = DateTime.Now;
                     jsonPatchDocument.ApplyTo(user);
-                    await _dbContext.SaveChangesAsync();
+                    await this.SaveChangesAsync();
                     updateResponseBody.ID = id;
-                    updateResponseBody.Success = true;
                     updateResponseBody.Entity = _mapper.Map<UserModel>(user);
+                    updateResponseBody.Success = true;
                 }
                 else {
                     throw new Exception($"User ID {id} Not Found");
@@ -132,7 +135,7 @@ namespace SocialMediaBrain.DaoManagers
                  .SetProperty(i => i.PhoneNumber, user.PhoneNumber)
                  .SetProperty(i => i.Gender, user.Gender)
                  .SetProperty(i => i.UpdatedDate, DateTime.Now));
-            await _dbContext.SaveChangesAsync();
+            await this.SaveChangesAsync();
             return numberOfUpdatedRows > 0;
         }*/
 
@@ -143,9 +146,9 @@ namespace SocialMediaBrain.DaoManagers
             {
                 User user = _mapper.Map<User>(userModel);
                 user.UserId = id;
-                EntityEntry<User> updatedUser = await this.UpdateAsync(user);
-                updateResponseBody.Entity = updatedUser.Entity;
-                updateResponseBody.ID = updatedUser.Entity.UserId;
+                OperationStatus<User> updatedUser = await this.UpdateAsync(user);
+                updateResponseBody.Entity = _mapper.Map<UserModel>(updatedUser.Entity);
+                updateResponseBody.ID = updateResponseBody.Entity.UserId;
                 updateResponseBody.Success = true;
             }
             catch (Exception ex)
@@ -163,18 +166,17 @@ namespace SocialMediaBrain.DaoManagers
                 User? user = await this.GetByIdAsync(id);
                 if (user != null)
                 {
-                    EntityEntry<User> userEntity = await this.DeleteAsync(user);
+                    OperationStatus<User> operationStatus = await this.DeleteAsync(user);
 
-                    if (userEntity.State != EntityState.Deleted)
+                    if (operationStatus.State != EntityState.Deleted)
                         throw new Exception($"User {id} is not deleted");
 
-                    await _dbContext.SaveChangesAsync();
-                    deleteResponseBody.ID = userEntity.Entity.UserId;
-                    deleteResponseBody.Entity = userEntity.Entity;
+                    deleteResponseBody.Entity = _mapper.Map<UserModel>(operationStatus.Entity);
+                    deleteResponseBody.ID = deleteResponseBody.Entity.UserId;
                     deleteResponseBody.Success = true;
                 }
                 else
-                    throw new Exception($"User Not found");
+                    throw new Exception($"User ID {id} Not found");
             }
             catch (Exception ex)
             {

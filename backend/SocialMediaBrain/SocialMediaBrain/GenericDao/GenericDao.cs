@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using SocialMediaBrain.DatabaseFirstApproach;
 using SocialMediaBrain.Interfaces;
+using SocialMediaBrain.ResponseBodyModel;
 using System.Reflection;
 
 namespace SocialMediaBrain.GenericDao
@@ -17,11 +18,14 @@ namespace SocialMediaBrain.GenericDao
             _dbContext = dbContext;
             _entity = dbContext.Set<TEntity>();
         }
-        public async Task<EntityEntry<TEntity>> AddAsync(TEntity entity)
+        public async Task<OperationStatus<TEntity>> AddAsync(TEntity entity)
         {
+            OperationStatus<TEntity> operationStatus = new OperationStatus<TEntity>();
             EntityEntry<TEntity> entityObj = await _dbContext.AddAsync(entity);
-            _dbContext.SaveChanges();
-            return entityObj;
+            operationStatus.Entity = entityObj.Entity;
+            operationStatus.State = entityObj.State;
+            await this.SaveChangesAsync();
+            return operationStatus;
         }
         public async Task<List<TEntity>> GetAllAsync(int take)
         {
@@ -31,11 +35,14 @@ namespace SocialMediaBrain.GenericDao
         {
             return await _entity.FindAsync(id);
         }
-        public async Task<EntityEntry<TEntity>> DeleteAsync(TEntity entity)
+        public async Task<OperationStatus<TEntity>> DeleteAsync(TEntity entity)
         {
-            EntityEntry<TEntity> entityEntry = _entity.Remove(entity);
-            await _dbContext.SaveChangesAsync();
-            return entityEntry;
+            OperationStatus<TEntity> operationStatus = new OperationStatus<TEntity>();
+            EntityEntry<TEntity> entityObj = _entity.Remove(entity);
+            operationStatus.Entity = entityObj.Entity;
+            operationStatus.State = entityObj.State;
+            await this.SaveChangesAsync();
+            return operationStatus;
         }
 
         public async Task<List<TEntity>> FilterAsync(string propertyName, object searchVal)
@@ -45,7 +52,7 @@ namespace SocialMediaBrain.GenericDao
             foreach (var obj in entityList)
             {
                 object val = this.GetPropertyValue(obj, propertyName);
-                if(object.Equals(val, searchVal))
+                if (object.Equals(val, searchVal))
                 {
                     filteredList.Add(obj);
                 }
@@ -53,11 +60,19 @@ namespace SocialMediaBrain.GenericDao
             return filteredList;
         }
 
-        public async Task<EntityEntry<TEntity>> UpdateAsync(TEntity entity)
+        public async Task<OperationStatus<TEntity>> UpdateAsync(TEntity entity)
         {
+            OperationStatus<TEntity> operationStatus = new OperationStatus<TEntity>();
             EntityEntry<TEntity> entityObj = _entity.Update(entity);
+            operationStatus.Entity = entityObj.Entity;
+            operationStatus.State = entityObj.State;
+            await this.SaveChangesAsync();
+            return operationStatus;
+        }
+
+        public async Task SaveChangesAsync()
+        {
             await _dbContext.SaveChangesAsync();
-            return entityObj;
         }
 
         private object GetPropertyValue(object obj, string propertyName)

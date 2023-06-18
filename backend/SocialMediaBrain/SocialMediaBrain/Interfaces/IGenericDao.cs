@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore.ChangeTracking;
 using SocialMediaBrain.DatabaseFirstApproach;
+using SocialMediaBrain.ResponseBodyModel;
 
 namespace SocialMediaBrain.Interfaces
 {
@@ -8,8 +9,9 @@ namespace SocialMediaBrain.Interfaces
         Task<TEntity?> GetByIdAsync(int id);
         Task<List<TEntity>> GetAllAsync(int take);
         Task<List<TEntity>> FilterAsync(string propertyName, object searchVal);
-        Task<EntityEntry<TEntity>> AddAsync(TEntity entity);
-        Task<EntityEntry<TEntity>> UpdateAsync(TEntity entity);
-        Task<EntityEntry<TEntity>> DeleteAsync(TEntity entity);
+        Task<OperationStatus<TEntity>> AddAsync(TEntity entity);
+        Task<OperationStatus<TEntity>> UpdateAsync(TEntity entity);
+        Task<OperationStatus<TEntity>> DeleteAsync(TEntity entity);
+        Task SaveChangesAsync();
     }
 }
